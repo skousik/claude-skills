@@ -1,0 +1,218 @@
+---
+name: technical-writing-style
+description: House style and voice for writing and revising technical documents in robotics, control, ML, and applied math (research papers, proposals, reports, and technical notes in any format), with special cases for LaTeX manuscripts edited locally or in Overleaf. Covers LaTeX source formatting (one sentence per line, semantic macros, \Cref, align/align*), section architecture (summary openings, topic sentences, Related Work, minimal Problem Statement, question-driven Experiments, Limitations), mathematical exposition, honest claims and empirical reporting, coauthor review-comment etiquette (figures are covered by the figure-making skill), and calibrated tone profiles for theory and systems papers, with a script that measures a draft against them, plus an optional classic theory register modeled on 2005–2015 manipulation and control papers. Use this skill whenever drafting, editing, restructuring, polishing, or reviewing any section of an academic paper or other technical document, applying coauthor or advisor comments, writing an abstract, introduction, contributions, related work, or limitations, matching a target paper's tone, or auditing a draft's prose and structure, even if the user only says "fix this paragraph", "make this sound better", or "clean up the intro".
+---
+
+# Technical Writing Style
+
+These rules apply to all technical writing, whatever the format (LaTeX, Markdown, Word, Google Docs, plain text). Rules that concern LaTeX source apply only there and are marked as such; in other plain-text sources that coauthors diff (Markdown, for example), keep one sentence per line as well.
+
+**Don't write like AI!** Avoid these patterns in every draft and revision:
+
+1. **Tell-tale vocabulary.** "delve", "leverage" (for "use"), "utilize", "harness", "underscore", "pivotal", "paramount", "intricate", "nuanced", "landscape", "realm", "tapestry", "holistic", "foster", "showcase", "streamline", "a testament to", "plays a crucial/pivotal role in". Use the plain word or name the mechanism.
+2. **Generic openers.** "In the rapidly evolving field of …", "In recent years, X has garnered significant attention", "With the advent of …". Open with the specific state and tension instead (see the introduction arc).
+3. **Trailing significance clauses.** ", highlighting the importance of …", ", demonstrating its effectiveness", ", ensuring robust performance". State the consequence as its own supported claim, or delete it.
+4. **Formulaic contrasts and reveals.** "not only X but also Y", "It's not X; it's Y", "The result? …", "The key insight is simple: …". A key-insight sentence is fine; the build-up to it is not. Also avoid terse aphorisms that compress a contrast into a balanced, quotable line ("Each discards what the other keeps.", "Sets bound; Gaussians weigh.", "One is safe, the other is useful."). State the specific contrast with its objects named, or delete the line if the previous sentence already made it.
+5. **Reflexive triplets.** "efficient, scalable, and robust" when the paper shows one of the three. List exactly the properties that are supported, however many that is.
+6. **Announcing instead of saying.** "It is worth noting that", "It is important to note", "Interestingly,", "Notably,". Say the thing.
+7. **Summary closers.** A final "Overall, …" or "In summary, …" sentence that restates the paragraph's topic sentence; "paving the way for …"; "opens exciting avenues for …".
+8. **Stacked hedges.** "may potentially help to", "could possibly". Use one hedge, attached to the specific uncertainty.
+9. **Uniform rhythm.** Every paragraph the same length and shape (claim, elaboration, summary). Vary length with the content; end a paragraph when its job is done.
+10. **Em-dashes.** Never use them anywhere in the paper: no `---`, `\textemdash`, or literal `—`. Set off an aside with commas or parentheses, or split the sentence; do not swap in a colon (group 15). En-dashes (`--`) for ranges are fine.
+11. **Lists where prose belongs.** Bullets or bold run-in labels inside an argument that should flow as paragraphs. Contributions and Limitations items may stay as lists, and research questions or hypotheses should be one (see Experiments).
+12. **Vague attribution.** "Studies have shown", "researchers have explored", "it is widely known" without a citation. Cite the specific work or drop the claim.
+13. **Abstract verbs in place of mechanisms.** "enables", "facilitates", "provides insights into", "offers a promising direction". Say what is computed, bounded, or measured.
+14. **Unicode in LaTeX source.** Curly quotes, a literal `≤`, or `×` in prose. Use ` `` '' ` and math mode.
+15. **Mid-sentence elaboration colons.** "The support grows: in the example, …", "The overbound recovers the sum: its mass matches …", "We evaluate two events: that … and that …". Even when the colon is grammatical, start a new sentence ("The support grows. In the example, …"), use a connective ("…, as its mass matches …"), or name the list in a full sentence ("They are …"). In captions, write "The columns give …" instead of "Table of X: the …". Colons stay fine before a display, in panel labels inside captions ("Left: …"), and in labels.
+16. **AI-coded verbs.** "survives" ("the guarantee survives propagation"; write "holds through"), and "gauge" in the sense of checking something ("we gauge the overlap"; write "check", as in "collision check" or "overlap check", accepting that "check" sounds binary). Keep "gauge" only for the mathematical gauge (Minkowski functional).
+17. **Question and vague headers.** "What the Bound Guarantees", "Why Our Method?", "How It Works", "Cost". Name the answer or the object precisely: "Probability Bounds", "Operation Counts".
+18. **Author names as subjects.** "Althoff et al. \cite{…} propose …", "Girard and Le Guernic show …". Make the method or result the subject and cite it: "Probabilistic zonotopes \cite{…} represent …".
+
+`scripts/tone_check.py` flags groups 1, 3, 6, 8, 10, 12, and 14–18 automatically (15–18 as hints, since a colon before a list or a mathematical gauge is legitimate); the rest need a read-through. Every em-dash hit (group 10) needs a rewrite. For the other groups, the strong-author example papers average under one hit per 1,000 words (ICRA finalists: about two), so treat each hit as worth a second look, not an automatic rewrite.
+
+A general style for technical papers whose argument is a construction plus a guarantee plus evidence. The goal is a paper a reader can follow by skimming paragraph openings and figures, where every claim is exactly as strong as its support, written in a direct, mechanism-first voice.
+
+## Before editing
+
+1. **Look for project-specific rules.** Check the paper directory for a `STYLE_GUIDE*`, `CLAUDE.md`, `macros.tex`, or similar notes from coauthors. Apply them on top of this skill; when they conflict, the project's rules win. Advisor or coauthor instructions recorded there are standing requirements for every edit, not only for the passages where they left comments.
+2. **Preserve meaning.** Restructuring and rewording must not change the mathematics, the stated assumptions, or the status of a result. Keep completed work and proposed work visibly distinct throughout.
+3. **Pick the tone profile.** Decide whether the paper is a *theory* paper (the argument rests on a formulation, guarantee, or analysis that experiments validate) or a *systems* paper (the argument rests on a method, system, dataset, or study evaluated empirically), then read `references/tone-theory.md` or `references/tone-systems.md`. For a mixed paper, use the profile that matches the section: theory for the formulation and results sections, systems for the experiments. If the user or project names a venue or a model paper, that takes precedence.
+4. **Use exemplar papers for structure and voice, not wording.** If the project names model papers, learn how they order ideas (task before construction, objects introduced when later steps need them, proofs that follow the same inclusions as the main text) and match their sentence rhythm and framing moves. Do not copy their phrases, and do not adopt promotional habits even if an exemplar has them.
+
+## LaTeX source conventions (LaTeX only)
+
+Treat the source as code that coauthors diff and review.
+
+- **One prose sentence per source line**, including captions and appendix prose. Blank lines only for paragraph breaks. Line breaks must not change the typeset output. This makes diffs and review comments line-precise.
+- **Semantic macros** in `macros.tex` for every reusable mathematical object, used consistently. Keep distinct objects in distinct macros even when their symbols currently coincide, so a later notation change touches one definition. Use a descriptive-subscript macro (e.g. `\lbl{goal}`) for word subscripts and keep mathematical indices distinct from them.
+- **`\Cref`** for all cross-references, equations included; never `\ref`, `\eqref`, `\autoref`, or lowercase `\cref`. Configure correct cleveref names for each theorem-like environment, and do not type "Section" or "Theorem" before it.
+- **Labels use spaces, not underscores**, especially in Overleaf: `\label{eq: my equation}`, not `\label{eq:my_equation}`. Keep a type prefix followed by a colon and one space (`eq: `, `sec: `, `thm: `, `fig: `, `tab: `), and reference the label exactly as written. The space after the colon is part of the label (`eq:my equation` is a different label), and a multi-label reference takes no space after its commas: `\Cref{eq: my equation,thm: main result}`, since `\Cref{eq: a, thm: b}` looks up a label that starts with a space. Spaced labels compile with amsmath, hyperref, and cleveref, and repeated internal spaces collapse to one. In an existing project whose labels use underscores, ask before renaming them, since every reference must change with its label.
+- **`align` for numbered displays, `align*` for unnumbered ones**, including single equations. No blank source line immediately before or after a display, so the surrounding prose stays in its paragraph.
+- Explicit spacing after `\forall` and similar quantifiers.
+- **One `\section` per source file**, appendix sections included. Keep all experiment subsections together in one experiments file.
+- **Header levels.** Below a `\section` that has no `\subsection`s, use `\subsubsection*` headers, not `\paragraph`; reserve `\paragraph` for the level below a `\subsubsection` or `\subsection`.
+
+## Document architecture
+
+**Every section and subsection opens with a brief summary paragraph** saying what follows and why the reader needs it (appendices too). An existing opening paragraph can serve; do not add redundant signposting or a paragraph that restates the heading. When the summary previews the headers that follow, it uses the headers' words verbatim, so the reader can match them. Prefer "we" as the subject of a section opener ("We now bound …", "In this section, we construct …") over the document as subject ("This section presents …"), which reads as soulless; this is a preference, not a ban. A subsection opener just says briefly what we do there, without "In this subsection"; an appendix may open with "This appendix …".
+
+**Introduce before use.** Say briefly what each concept is before its name carries an argument (e.g. "a zonotope, which is a convex, centrally symmetric polytope given by an affine map of a hypercube" at its first appearance), and explain each piece of jargon ("template", "slack", "certificate") in plain words where it first appears. Forward references to sections and results are fine in roadmap sentences, where a limitation is lifted later, or where the reader may be curious about something answered later. A forward reference to an equation, especially one in the appendix where the reader would not naturally skip ahead, must say in words what the equation is and why it is cited here ("the volume of a polytope, computed in closed form in \Cref{…}"), since an equation is a detailed object, not a broad one like a section or theorem.
+
+**Notation in the preliminaries.** The notation paragraph in the preliminaries states every typographic convention the paper uses (e.g. scalars, vectors, matrices, sets, random variables, events, index-set subscripts), and the whole paper follows it; after editing, check each symbol against it. Notation used throughout the paper is defined there. Notation used in only one section or proof is defined both where it is used and in the notation paragraph, until the paragraph is cut for length.
+
+**Restate known results briefly.** A result that follows directly from prior work or from a one-line check goes in a sentence with its citation, not in a new lemma with its own proof.
+
+**Scope depends on the version.** An arXiv or other long version may keep every correct result and run as long as the ideas need, even combining material from companion papers. A journal or conference submission needs a tight story: keep a result, computation, or variant only if the method, a main guarantee, or an experiment uses it, and move the rest to a companion paper, the long version, or the appendix, leaving a one-sentence hint where a reader might wonder whether a refinement exists ("tighter bounds are possible by …"). In a theory paper, a result that is satisfying on its own can stay even if no experiment uses it; do not invent an experiment just to justify it. When the user has not said which version is being edited, ask.
+
+**Paired terms keep one order.** When the paper names a pair (outer and inner, upper and lower, offline and online), pick the order once, outer before inner by default, and use it everywhere: prose, proposition statements, proofs, table columns, and captions.
+
+**Introduction.** Follow the arc in *Voice and tone* below. Name the concrete task the system must perform and state the output precisely before introducing machinery. Explain why the chosen formulation (e.g. which variables are kept free) is useful before naming the tools that achieve it. Keep a few focused citations to establish the gap; the full survey goes in Related Work. Keep the introduction and abstract at the level of the idea. Define each object in one clause and state what the method does, not how; formulas, propagation steps, and the separate definitions of each variant belong in the method sections. The introduction may define a set of variants together in one sentence; the abstract names them as a group ("outer, inner, and free forms") or states what they guarantee together, rather than defining each.
+
+**Contributions** go either under their own unnumbered heading or in an introduction paragraph led by an inline bold label (**Contributions.**), separate from the approach explanation. Open with a one-sentence summary that states how many there are ("We make three contributions."), then list them as items. Three is the soft target, usually two for the method and one for the experiments or validation against baselines; four is acceptable, and five usually reads as salami slicing, so merge related constructions into one item rather than listing each operation separately. Each item is one to two sentences, slightly more than a one-line gist, naming what is computed, proved, or measured; the detail belongs in the sections that develop it. In a short paper (about 6–8 pages in IEEE format), each item cites the section that develops it, and the organization paragraph covers only what the items do not (related work, preliminaries, conclusion, appendices). In a longer paper (more than about 8 pages), items need not cite sections, and a separate, complete organization paragraph closes the introduction. State contributions as outputs (what is computed, what is proved, what is measured). Distinguish proved correctness from unverified performance or priority claims.
+
+**Novelty claims** appear in two places, each written in full so it can be edited down or cut for length or venue. First, the paragraph before the contributions, which summarizes the proposed method, contains a clear novelty statement: "To the best of our knowledge, this is the first work to …", or the scoped form "X is the only …". Second, Related Work opens with a very brief statement (often one sentence) of how the method relates to the prior work as a whole; it is often cut for space, but write it so the choice exists.
+
+**Related Work** is its own section after the Introduction. Open with a paragraph naming the broad themes, then use thematic subsections organized by the question each line of work answers or the object it computes. Compare methods by the object they compute and the variables they retain: say what prior work already does before stating how this paper's output differs. Each subsection ends with how this paper differs from that specific line of work. Do not end Related Work with a "floating" comparison paragraph after the last subsection; the reader cannot tell whether it belongs to that subsection or summarizes the whole section, so put an overall comparison in the opening paragraph instead.
+
+**Problem Statement** contains only the setup needed to pose the task: given information, uncertainty description, requirements, and requested output, in enough abstract notation to be precise. The chosen parameterization, specific error models, and the construction belong in the Method. Do not present the solution as part of the problem, and do not promise behavior whose model and guarantee are never established. When the method solves a restricted version of the generic problem, introduce the restriction in the method and explain how its answer relates to the generic task, including any loss of completeness.
+
+**Method.** Go from general to specific: define the general object and its operations first (the theoretical formulation), then give the specific instance or implementation its own section with its instance-specific results, rather than introducing the instance first and generalizing afterward. Within each, describe the computation in execution order and introduce each object when a later step needs it. A subsection that grows longer than the rest of its parent section, or that later sections cite as a unit, becomes its own section. Keep the method general in dimensions and design parameters with assumptions explicit; evaluated settings go in an experiments table, and implementation-specific constants stay in the appendix without claiming they generalize. Give distinct components (e.g. separate constraints or losses) their own subsections. State what each stage computes, what it needs as input, and when it must be redone (e.g. offline vs. online work) instead of vague words like "reusable".
+
+When the method is a construction with a correctness guarantee, additionally: present the theoretical objects before any computational representation of them, then prove the representation encloses or matches them; keep exact-arithmetic correctness separate from finite-precision guarantees (the latter usually in the appendix, with a short cross-reference from the main argument).
+
+**Experiments.** Open with a summary paragraph that states what the experiments test as an explicit list of research questions (Q1, Q2, …) or hypotheses (H1, H2, …), not only in prose, and say which questions are validations and which are experiments. If the shared setup (implementation, common parameters, ground truth, error metrics) runs longer than about 150 words, give it its own first subsection ("Common Experiment Setup") and point back to it instead of repeating it. Then give each question its own subsection with `\subsubsection` headers, even when each part is brief:
+  - an **experiment**, which tests a hypothesis against ground truth, uses *Hypothesis*, *Experiment Design*, *Results*, *Discussion*;
+  - a **validation**, which checks that an operation computes what it claims, uses *Validation Question*, *Test Design*, *Results*, *Discussion*.
+
+  Results report observations and numbers; explanations ("We attribute this to …") and the verdict on the hypothesis go in Discussion. Put implementation details (grids, solvers, sample counts) in the design subsubsection of the experiment that uses them. Separate completed experiments from proposed studies and name missing evidence explicitly. If there is a requested experimental agenda, use it to organize evaluation and future work, but report only results that exist; keep the planned design visible when results are missing, and do not anticipate comparative outcomes. When comparing against baselines, state differences in setting (e.g. dynamics, inputs, uncertainty models, compute budgets), and distinguish baseline measurements from controlled ablations. Do not assume a design parameter helps monotonically (e.g. "higher order is better"); test it, and keep similarly named parameters distinct.
+
+**Figures** are covered by the `figure-making` skill: panel layout and whitespace, size and fonts matching the paper, figure captions, figures for key constructions, front figures, renders, and photos under double-blind review. Load it whenever a figure or its caption is created, revised, or reviewed. Table captions stay here.
+
+**Table captions** are at most two typeset lines: one noun phrase naming what the table shows (IEEE sets it in capitals above the table, with no period at the end and no leading "A", "An", or "The"). Drop any further explanation that the column headers, units, and row labels already make clear; put the rest in a short note set in footnote size directly under the tabular, inside the same table environment (e.g. a `\tablenote{}` macro). IEEE style allows explanatory notes under a table; mark a note that applies to one entry with a superscript lowercase letter, not an asterisk or dagger.
+
+**Limitations** get a dedicated home: a standalone Limitations section before the Conclusion, a combined "Limitations and Conclusion" section, or a subsection under Conclusion. Write 2–4 concrete items, each naming an assumption, dependency, or untested regime, where it matters, and what would lift it. Essential qualifications still stay beside the claims they limit; the Limitations section is a summary, not a hiding place.
+
+**Main text vs appendix.** Main text carries the construction, the argument, and the guarantee. Implementation details (storage orders, compiler flags, operation counts, acceleration tricks), long proofs, LLM prompts, and other long-form material go in the appendix, but keep enough numerical context in the body to state soundness. While drafting, the user may ask to park material in the appendix to see the story more clearly and decide later what to pull back; treat such moves as provisional, and leave a pointer in the main text so the material is easy to find.
+
+## Paragraphs and sentences
+
+- **Topic sentence first.** Each paragraph's first sentence states its main idea; definitions, reasoning, evidence, and qualifications follow. A reader skimming first sentences plus figures should get most of the paper.
+- **Every paragraph has a technical job**: introduce an obstacle, define an object, prove a step, or interpret a result. Delete paragraphs that only announce importance or rigor.
+- **Use the venue's vocabulary.** Choose general terms that fit the target community and the paper's content, as a guideline rather than a fixed mapping. For a controls venue, "system", "state", "input", "controller", and "avoid set" (or "unsafe set") usually fit; for a robotics venue, "robot", "obstacle", "action", and "policy" are fine. Use the specific term where the paper models that object (a robot in a robot experiment), and keep one term per object throughout.
+- **"Random sample", not "draw".** Write "random sample" or "sample" for the noun and "sample" for the verb ("$2 \times 10^5$ random samples", "we sample …"), not "draw". "Draw" is standard in some communities, but this is the house preference, and it also avoids ambiguity with plotting.
+- **Concrete subjects and verbs.** "The row bounds a link projection," not "this provides a useful structure." Avoid "a useful structure", "makes the result useful", "provides a principled framework", and repeated "this ensures". Avoid vague back-references like "both certificates" when the reader may not know which two.
+- **Connected technical English.** Familiar words, one main claim per sentence, but keep a subordinate clause when it carries the reason. Simplification must not produce a string of disconnected short sentences.
+- **Author voice for decisions.** Say what we choose, construct, bound, prove, or measure, and why the choice serves the task. Keep mathematical facts attached to their objects; do not mechanically prepend "we" to everything.
+- No "clearly", "obviously", meta-commentary about the document being an exposition, generic promises, or repeated summaries of a proof. No rhetorical questions whose answer is implied; a research question that the paper states and then answers is fine.
+
+## Voice and tone
+
+These rules apply to both profiles; the profile files add section-level templates and numeric targets. The targets blend the hand-picked authors' papers (two-thirds) with the ICRA 2024–26 award finalists (one-third).
+
+1. **Name the thing, not "our method".** After introducing the method, refer to it by its name or by what it computes ("the filter", "the certificate", "the scheduler"). Use "our" mainly to contrast with a specific baseline; "our approach/method" appears at most about once every two pages.
+2. **State the difficulty as a mechanism, not a "challenge".** Replace "X is challenging" with what goes wrong and what it costs: *[A] improves [B] at the cost of [C].* Use "to address this challenge" almost never.
+3. **Let punctuation carry structure, sparingly.** Use a semicolon to join two clauses whose contrast or consequence is the point, *with an exact model the bound is tight; with model error it is conservative*, about one or two per page. Do not use a colon to hang an elaboration off a claim (group 15); split the sentence or use a connective. No em-dashes; set off a brief aside with commas or parentheses.
+4. **Drop stock transitions.** "However" only for a genuine reversal, at most about once per page. Delete "Moreover", "Furthermore", and "Additionally" when the next sentence already follows on. Prefer connectives that carry inference ("thus", "therefore", "consequently"), or none. "In this paper" at most a few times in the whole paper.
+5. **Keep promotional words rare.** "Novel", "state-of-the-art", "crucial", "unprecedented", "seamless", and "remarkable" at most once or twice per page combined, and never as the support for a claim. "Significantly" only with a significance test.
+6. **Prefer active voice** where the agent matters; passive is fine where it does not (roughly one sentence in five or six).
+7. **Vary sentence length on purpose.** Average about 20 words, with roughly one sentence in ten above 35 words when it carries a reason or a contrast, and a short sentence (under 12 words) to land the point.
+8. **State assumptions as an access model**, in one plain sentence near the start: *We assume only [access]: [what is unknown], and [what is available].*
+9. **Ask the paper's question explicitly** in the introduction, and answer it: *We therefore ask whether …*, *This raises a question: …*
+10. **Give the key insight its own sentence**, then two or three sentences on how it becomes the method.
+
+**Introduction arc** (about 5 paragraphs, about 600 words in a conference paper):
+
+1. One opening sentence on the field state and its tension: *[Object] is increasingly [capable/used], yet [specific shortcoming].* A concrete task or scenario also works. Avoid openers that only assert importance ("X is crucial in robotics", "X has attracted significant attention").
+2. What existing approaches compute, guarantee, or assume, and what they do not: *[Prior methods] recover [X], but they do not [Y].*
+3. The question or the core difficulty, in one or two sentences.
+4. The key insight, then what the method does, briefly.
+5. Contributions, with results stated in words. Numbers first appear in the experiments. A theory paper's abstract and introduction carry no experimental numbers. A systems paper may give one headline number in the abstract and in its experiment contribution, with no separate results-preview paragraph; only a strongly results-driven systems paper carries more.
+
+**Measuring a draft.** After drafting or revising a substantial section (at least ~1,500 words), run
+`python3 -I <skill-dir>/scripts/tone_check.py <main.tex or paper dir> --profile theory|systems [--section intro|related|method|experiments|conclusion]`.
+It reports the profile metrics with flags and lists sentences containing discouraged words. Use it as a sanity check: fix flagged sentences when the rewrite is also clearer, and ignore one or two flags otherwise. On a strong author paper it typically raises 2–3 flags; on a typical baseline paper, 5–7.
+
+## Optional: classic theory register
+
+Use this layer when the user asks a paper to read more like the 2005–2015 manipulation and control papers (Tedrake, Posa, Sastry, Khatib, Haddadin, Goldberg), or when a theory draft reads correct but clipped, stating each result without walking the reader into it.
+It sits on top of the rules above and changes nothing unless chosen.
+It is based on a reading of 23 such papers, measured against a modern draft.
+
+**Relaxations.** The AI-avoidance rules can push a draft well below how these authors write: about an eighth of their passive constructions, a seventh of their hedges, and no "Note that", "e.g.", or "However". Under this layer:
+- Passive voice is normal for procedures and dynamics ("the impulse is applied at the contact point", "the robot was commanded to rest"), where the agent does not matter. A draft far below about 5 passives per 1,000 words may read as forced.
+- "Note that" is fine after a display when it states a consequence of the display ("Note that $\lambda=0$ whenever …"). It is still not fine as an announcement of importance (group 6).
+- About one genuine "However" per page is fine, and a parenthetical "(e.g., …)" gloss is fine where an example helps.
+- Long sentences (35–50 words) can appear about once every two paragraphs of narrative prose, where a concession, reason, or consequence is the point: *While [prior method] can [X], it [does not Y], because [mechanism].* Place them in the introduction, the remarks after theorems, and the discussion, not only in definition lists. Do not split a compound sentence just because it has two clauses.
+
+**What stays strict.** Contributions remain a list, experiments state explicit hypotheses or questions, a theory abstract carries no experimental numbers, and paragraphs stay short. The classic papers often do otherwise, and modern reviewers penalize it. Boosters ("very", "clearly", "vastly outperforms") stay rare.
+
+**Moves to add.** Each costs one or two lines; in a page-limited paper, pair each with a cut.
+1. **Name the guarantee.** Define the property the main theorem delivers, give it a name ("We call such a plan a *robust contact plan*"), and use that name in the abstract and introduction.
+2. **Paraphrase before formalizing.** One informal sentence before a definition or theorem: *Roughly speaking, [the mechanism in words].*
+3. **Gloss each assumption.** After an assumption block, one sentence on what each item means or where it enters: *Item (a) holds for …, (b) is where [model] enters, and (c) says ….*
+4. **Announce the main result and give the proof strategy.** "The following theorem is the main result." Open each nontrivial proof with one sentence on its strategy (*We bound [X] on each interval between events, and then across each event*).
+5. **Say where conservatism enters.** After a bound, name the exact steps that lose tightness and the steps that are exact: *[Lemma] is an equality, so conservatism enters only through [quantity] and [inequality], which is tight only when ….*
+6. **Point each contribution to its result.** Cite the theorem or lemma that establishes each contribution, not only the section.
+7. **Bound claims by operating range and compare them to an accepted threshold.** State the range over which a claim holds (speeds, masses, uncertainty sets) and compare a computed bound to a reference the reader already trusts, such as a replanning period, a standard's limit, or a physical analogy. Write *well under the 0.5 s replanning period*, not *fast enough for real time*.
+
+Optional further moves from the same papers: frame novelty as a classical property that fails in the new setting (*Without impacts, [property] holds for all time; an impact breaks this, because …*); state guarantees as a priority ordering (which requirements always hold, and which hold subject to them); teach the key tool with a scalar or 2-D toy example when space allows.
+
+## Terminology
+
+- Define each technical term once and use it unchanged throughout. Do not rotate synonyms for variety; readers assume a new word means a new object.
+- Do not use a term that implies structure you have not established (e.g. "chart/atlas" without a manifold, "optimal" without an optimization result). Pick the plainer term that is true.
+- Watch for overloaded words that collide with field conventions (e.g. "control" meaning a curve control point vs. a feedback input) and disambiguate on first use.
+- Match the claim to the computation: if the evaluated routine searches for feasible solutions, call it feasible-solution search and do not let feasibility data suggest cost minimization, even if the general problem is posed as optimization.
+- Refer directly to a displayed constraint instead of coining an auxiliary set name the reader must remember.
+
+## Mathematical exposition
+
+- **Motivate before displaying.** Explain the geometric meaning and purpose of an object before its formula (e.g. describe a box's half-lengths, rotation, and translation before the occupied-set formula). Follow the display with its immediate consequence.
+- Supply enough steps that a reader need not infer missing ones; redundancy can be trimmed later, gaps cannot be guessed.
+- **State assumptions where they enter**, once, and refer back later. Be explicit about what is assumed versus derived (an assumed tracking bound is not a controller result; a commanded state is not a physical state).
+- Keep bounds tied to what they bound (e.g. terminal bounds vs. whole-trajectory bounds).
+- **Proofs**: short in the body, exposing the core argument (often a chain of inclusions); expanded in the appendix with each inequality and its domain stated. No appeals to implementation names. A notation change is not a new implementation or a new result.
+
+## Claims and empirical reporting
+
+- **Qualify sweeping claims.** Any universal claim about what a field does or what methods cannot do ("reachability analysis propagates …", "planners cannot …", "no method handles …") gets one qualifier ("typically", "usually", "most often", "to our knowledge") unless a citation supports the unqualified form or the paper proves it. Even a true unqualified claim can read as too strong to a reviewer; be a little humble and polite. One qualifier per claim (see group 8).
+- **Every citation supports its exact sentence**, not just its topic. A claim that is common knowledge in the field, or that the paper itself argues, needs no citation, and a wrong citation is worse than none. When unsure whether a cited work supports a claim, check it yourself first (the project's reference PDFs, the paper's abstract or text via Semantic Scholar or arXiv), rather than relying on its title; then fix the citation, or flag it for the user with what you found if it remains unclear.
+- Every novelty claim needs a specific comparison, which Related Work supplies by saying how this paper's result differs; attribute established tools where used.
+- **Report denominators.** Separate rates among filtered samples from rates among all samples, and per-query averages from pooled rates. Distinguish infrastructure failures (tool/API errors) from the method's own failures (e.g. detected safety violations).
+- **Results sentences: finding, then number, then reason.** Report where the method does not win in the same paragraph as where it does. Mark explanations as explanations ("We hypothesize that …").
+- Describe observations as observations. Keep each qualification beside the number it qualifies.
+- **Public scholarly citations only.** No file paths, filenames, internal reports, or repository identifiers in the manuscript or bibliography; the paper must stand on its own.
+
+## Collaborative review etiquette (Overleaf or shared source)
+
+- After acting on a coauthor's inline suggestion, acknowledge it in a signed review comment and comment out every line of the original suggestion in the source.
+- Keep pending requests visible until addressed.
+- Never resolve a coauthor's review thread on their behalf.
+- When a change alters meaning that is the author's call, leave a comment asking rather than editing silently.
+
+For before/after rewrites illustrating the structural rules, read `references/revision-examples.md`; for voice-level rewrites, see the "Shape examples" at the end of each tone profile.
+
+## Final pass checklist
+
+Run this on any section or full draft before calling it done:
+
+- [ ] Every displayed equation or bound has a stated purpose and an immediate consequence.
+- [ ] Novelty is stated explicitly (e.g., "To the best of our knowledge, this is the first work to …") in the method-summary paragraph before the contributions; Related Work opens with a brief overall comparison, each Related Work subsection ends with its own comparison, and no floating comparison paragraph follows the last subsection.
+- [ ] Every numerical qualification sits beside the claim it limits; denominators are explicit.
+- [ ] Sentence-per-line source; no em-dashes; no blank lines around `align`/`align*`; `\Cref` throughout; labels use spaces (`eq: my equation`), not underscores; macros used for every reusable object.
+- [ ] Every section and subsection opens with a summary paragraph.
+- [ ] Every paragraph opens with a topic sentence; skim first sentences plus figures and check the argument comes through.
+- [ ] The introduction follows the arc: tension, prior work by what it computes, question, insight, contributions with results in words (no experimental numbers in a theory paper's abstract or introduction; at most one headline number in a systems paper's).
+- [ ] Related Work has an overview paragraph and thematic subsections, each saying how this paper's result differs.
+- [ ] Problem Statement contains no solution; restrictions are introduced in the Method.
+- [ ] Experiments open with an explicit list of research questions (Q1, Q2, …) or hypotheses (H1, H2, …), marked as validations or experiments; shared setup over ~150 words has its own first subsection; each experiment has Hypothesis/Experiment Design/Results/Discussion and each validation Validation Question/Test Design/Results/Discussion subsubsections; completed vs. proposed is explicit.
+- [ ] No mid-sentence elaboration colons (captions included), no "survives", no "gauge" for a check, no question or vague headers, no author names as sentence subjects; no `\paragraph` directly under a `\section` without subsections.
+- [ ] Each concept and piece of jargon is explained at first use; summary paragraphs use the following headers' words verbatim; the contributions sentence states their number; paired terms (outer/inner) keep one order everywhere.
+- [ ] A Limitations section or subsection exists, with concrete items.
+- [ ] Terms are used consistently; no synonym drift; no term implies unestablished structure.
+- [ ] The method is named, not "our method"; no "challenge"/"to address" framing; stock transitions and promotional words are rare.
+- [ ] No meta-commentary, generic promises, "clearly/obviously", rhetorical questions, or repeated proof summaries.
+- [ ] No internal paths, filenames, or repository identifiers.
+- [ ] `scripts/tone_check.py` run with the right profile on drafts of ~1,500+ words; remaining flags are deliberate.
+- [ ] If the classic theory register was chosen: the guarantee is named, each main result has a paraphrase before it and a conservatism remark after it, assumptions are glossed, contributions cite their theorems, speed or performance claims are tied to a reference threshold, and the long sentences fall in narrative prose, not only in definitions.
+- [ ] Read transitions aloud.

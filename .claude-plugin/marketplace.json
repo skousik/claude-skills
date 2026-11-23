@@ -1,0 +1,16 @@
+{
+  "name": "skousik-skills",
+  "owner": {
+    "name": "Shreyas Kousik"
+  },
+  "metadata": {
+    "description": "Claude Code skills for writing technical papers and making their figures."
+  },
+  "plugins": [
+    {
+      "name": "paper-writing",
+      "source": "./",
+      "description": "Technical writing style and figure-making skills for research papers."
+    }
+  ]
+}

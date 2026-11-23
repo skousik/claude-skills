@@ -1,0 +1,9 @@
+{
+  "name": "paper-writing",
+  "version": "1.0.0",
+  "description": "House style for technical writing and paper figures in robotics, control, ML, and applied math.",
+  "author": { "name": "Shreyas Kousik" },
+  "repository": "https://github.com/skousik/claude-skills",
+  "license": "MIT",
+  "keywords": ["writing", "latex", "figures", "matplotlib", "research", "papers"]
+}
