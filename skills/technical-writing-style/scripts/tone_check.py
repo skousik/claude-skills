@@ -70,12 +70,21 @@ AI_PATTERNS = {
                             r"|has been (widely|extensively) (studied|explored))\b",
     # 15: a colon inside a sentence, unless it introduces a display or a list item, or follows "as follows"
     "15 mid-sentence colon": r"(?<!follows)(?<!following):\s+(?!DISPLAYMATH|ITEM)\S",
-    "16 AI-coded verb (survive; gauge for a check)": r"\bsurviv(?:e|es|ed|ing)\b|\bgaug(?:e|es|ed|ing)\b",
+    "16 AI-coded verb (survive; gauge for a check; charge/absorb for an operation)":
+        r"\bsurviv(?:e|es|ed|ing)\b|\bgaug(?:e|es|ed|ing)\b|\bcharg(?:e|es|ed|ing)\b|\babsorb(?:s|ed|ing)?\b",
+    # 19: "X is the Y that Z verbs", an object relative clause after a copula (hint; one is fine, several are not)
+    "19 'is the Y that Z verbs'": r"\b(?:is|are|was|were) the (?:\w+ ){0,2}?\w+ that (?:the|a|an|its|their|each|every|our|we|it|they|this|these|one)\b",
     "18 author name as subject": r"(?-i:\b[A-Z][a-z]+(?: et al\.| and [A-Z][a-z]+)?\s*\[CITE\]\s+(?:propos|present|introduc|show|develop|extend|stud|consider|use)\w*)",
 }
 # 17: headers phrased as questions or as vague single words
 QUESTION_HEADER = re.compile(r"\\(?:(?:sub)*section|paragraph)\*?\{((?:What|Why|How|When|Which|Does|Do|Is|Are|Can)\b[^}]*|[^}]*\?)\}")
 VAGUE_HEADER = re.compile(r"\\(?:(?:sub)*section|paragraph)\*?\{(Cost|Details|Overview|Analysis|Remarks|Miscellaneous)\}")
+
+# LaTeX: every display should be numbered (align, never align*, equation*, or \\[ \\])
+UNNUMBERED_DISPLAY = re.compile(r"\\begin\{(?:align|equation|gather|multline|flalign)\*\}|(?<!\\)\\\[")
+# citations without a [Sec./Thm.] pointer, checked against @book entries in the project's .bib files
+CITE_CMD = re.compile(r"\\(?:cite[tp]?|parencite|autocite)\*?(\[[^\]]*\])?(?:\[[^\]]*\])?\{([^}]*)\}")
+BOOK_ENTRY = re.compile(r"@(?:book|mvbook)\s*\{\s*([^,\s]+)", re.I)
 
 UNICODE_IN_SOURCE = re.compile(r"[‘’“”–≤≥≠×→←≈±…·]")
 # Group 10: em-dashes are banned in any form (---, \textemdash, a literal em-dash); en-dashes (--) are fine.
@@ -225,6 +234,9 @@ def main():
         if "\\subsection" not in chunk and "\\paragraph" in chunk:
             ai_hits.append(("17 header level", f"\\paragraph under \\section{{{title}}} without subsections; use \\subsubsection*"))
     files = [main_tex] if Path(a.target).is_file() else sorted(Path(a.target).rglob("*.tex"))
+    books = set()
+    for b in Path(root).rglob("*.bib"):
+        books |= set(BOOK_ENTRY.findall(b.read_text(errors="ignore")))
     for f in files:
         for i, line in enumerate(f.read_text(errors="ignore").splitlines(), 1):
             line = re.sub(r"(?<!\\)%.*", "", line)
@@ -234,6 +246,12 @@ def main():
                 ai_hits.append(("14 unicode in source", f"{f.name}:{i}: {line.strip()}"))
             if QUESTION_HEADER.search(line) or VAGUE_HEADER.search(line):
                 ai_hits.append(("17 question or vague header", f"{f.name}:{i}: {line.strip()}"))
+            if UNNUMBERED_DISPLAY.search(line):
+                ai_hits.append(("LaTeX unnumbered display; use align", f"{f.name}:{i}: {line.strip()}"))
+            for opt, keys in CITE_CMD.findall(line):
+                whole = [k.strip() for k in keys.split(",") if k.strip() in books]
+                if whole and not opt:
+                    ai_hits.append(("whole-book citation; cite a section or theorem", f"{f.name}:{i}: {', '.join(whole)}"))
     print(f"\n{len(ai_hits)} AI-like pattern hit(s) (see \"Don't write like AI!\" in SKILL.md).")
     for name, s in ai_hits[:40]:
         print(f"  [{name}] {re.sub(r'\s+', ' ', s)[:180]}")
