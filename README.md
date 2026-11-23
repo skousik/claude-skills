@@ -33,6 +33,10 @@ It needs only the Python standard library. Use `--profile systems` for empirical
 - These are one lab's house rules, not universal ones. Where a project has its own style guide, the skills defer to it.
 - `figure-making` points to a `dataviz` skill for chart-form and palette choices; it works without it.
 
+## Credits
+
+[Sundhar Vinodh-Sangeetha](https://github.com/sundharvs) wrote the early draft of the `technical-writing-style` skill.
+
 ## License
 
 [MIT](LICENSE)
