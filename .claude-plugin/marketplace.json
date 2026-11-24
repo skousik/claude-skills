@@ -4,13 +4,13 @@
     "name": "Shreyas Kousik"
   },
   "metadata": {
-    "description": "Claude Code skills for writing technical papers and making their figures."
+    "description": "Claude Code skills for writing, proofreading, and making figures for technical papers."
   },
   "plugins": [
     {
       "name": "paper-writing",
       "source": "./",
-      "description": "Technical writing style and figure-making skills for research papers."
+      "description": "Technical writing style, proofreading, and figure-making skills for research papers."
     }
   ]
 }
