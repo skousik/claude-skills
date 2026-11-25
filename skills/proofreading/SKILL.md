@@ -26,7 +26,7 @@ This skill is adapted from [Jakob Thumm's proofreading skill](https://github.com
 This skill audits; the `technical-writing-style` skill (in the same repository) states the rules. The split is:
 
 - **technical-writing-style owns** voice, prose patterns to avoid, section architecture (introduction arc, contributions, Related Work, experiments, limitations), LaTeX source conventions, and exposition. This skill does not restate those rules. Check 7 walks its checklist instead, and Checks 1 and 5 point to it where they overlap.
-- **This skill owns** the line-level audits that the writing skill does not cover: symbol and index definitions, notation consistency, statistical reporting, figure and table mechanics, grammar mechanics (tense, spelling variant, punctuation, compound adjectives), abbreviations, and the jargon audit of Check 1.11.
+- **This skill owns** the line-level audits that the writing skill does not cover: symbol and index definitions, notation consistency, statistical reporting, figure and table mechanics, grammar mechanics (tense, spelling variant, punctuation, compound adjectives), abbreviations, the jargon audit of Check 1.11, and the non-sequitur audit of Check 1.12.
 - **Precedence.** Where a check below conflicts with technical-writing-style, or with a project's own style guide (`STYLE_GUIDE*`, `CLAUDE.md`, coauthor notes), those win. The known conflicts are resolved inline and marked "house override".
 - If technical-writing-style is not installed, run Checks 1–6 as written and skip Check 7.
 
@@ -176,6 +176,26 @@ Check 2 covers symbols and Check 6 covers abbreviations; this check covers techn
    - `[WARN]` if a key word such as "certified" or "guarantee" is used for things that do not meet the definition the paper gives it. `[VIBE]`
 
 Report each finding as: term, first use (section and quoted phrase), where it is defined (or "never", "appendix only", "commented out"), and a one-clause suggested definition or rename.
+
+#### 1.12 Check logical flow (non-sequiturs)
+
+A non-sequitur is a sentence that does not follow from what the reader has seen so far: its "so", "hence", "because", or plain juxtaposition asks the reader to supply a step the text never gives. Drafts collect them through revision, since a cut or a moved paragraph often removes the bridge sentence and leaves the sentences on either side of it.
+
+1. **Read the active text in reading order.** Skip commented-out source (`%` lines, `\iffalse` blocks) and anything not `\input` from the root, since a bridge that exists only in a comment does not exist for the reader. Read the whole body once, section by section, before collecting findings, so that cross-section links (a promise in the introduction, its payoff in the experiments) are in view.
+2. **At each sentence, ask whether it follows from what came before.** Look in particular for:
+   - **Lead-ins that misdescribe what follows.** A sentence that introduces a proposition, list, or subsection with a description that does not match it (e.g., "There are two ways of building the template, ..." before a proposition whose two cases are rescaling or not rescaling the density). `[ERROR]` `[VIBE]`
+   - **Stale reasons.** A clause that justified a definition or step in an earlier version but no longer applies (e.g., "some sets have no notion of probability. Hence, the following definition." after those sets stopped using the definition). `[ERROR]` `[VIBE]`
+   - **Missing setup for a later claim.** A contribution, result, or bound that relies on a fact the reader was never told, often because the sentence that said it was cut (e.g., a contribution that bounds the "true state" when the introduction never said the propagation is approximate). `[WARN]` `[VIBE]`
+   - **Skipped causal steps.** A "so", "therefore", or "as a consequence" whose conclusion needs an intermediate fact (e.g., "our results consider only linear dynamics; as a consequence our experiment underpredicts the peak", where the missing step is that the experiment therefore uses a linear model). `[WARN]` `[VIBE]`
+   - **Unexplained qualifiers and conditions.** A restriction stated without its reason ("for every accepted plan, ..."), or a choice phrased as a condition ("its bound exceeds one unless the box hull encloses ..."). Check the code or the derivation for the real condition and state it. `[WARN]` `[VIBE]`
+   - **Unlinked references back.** A clause such as "in the same way, input by input" or "for the same reason" that relies on the reader recalling a specific earlier fact; name the fact. `[INFO]` `[VIBE]`
+   - **Terms used as if already defined.** A named concept that appears before its definition and carries the argument at that point (e.g., "bounds the probability of first exit" two sections before first exit is defined). Check 1.11 covers jargon in general; flag it here when the undefined term breaks the logic of the sentence. `[WARN]` `[VIBE]`
+   - **Apparent contradictions between nearby passages.** A Results statement and the Discussion's verdict that look inconsistent to a skimmer even when they are logically compatible (e.g., "missed every Monte Carlo interval" followed by "the hypothesis holds"), or two sections that explain the same observation by different causes (e.g., two remarks cited for the same failure). `[WARN]` `[VIBE]`
+   - **Sentences with no clear antecedent.** A sentence whose subject or pronoun points to nothing in the preceding text, or to an object the generic text never introduced (e.g., "the avoid set enlarged by its support" in a section that never mentions a body). `[WARN]` `[VIBE]`
+3. **Do not flag** a forward reference in a roadmap sentence, a deliberate topic change at a paragraph or header break, or a link that the preceding sentence states outright. Ask for each candidate whether a reader who reads every word in order, and nothing in comments, would stumble.
+4. **Suggest the smallest fix.** Prefer adding the missing clause or reason, renaming the referent, or cutting the stale clause over restructuring. When a fix changes what a sentence claims, check the claim against the derivation, data, or code first.
+
+Report each finding as: location (file, line, section), the quoted sentence, one sentence on the step the reader is missing, and a concrete rewrite. Rank them from clear non-sequiturs (misdescribing lead-ins, stale reasons, missing setup) to harder-to-follow links. In interactive mode, or when the user asks to decide one by one, present them as "N of total" and collect every answer before applying any edit.
 
 ### Check 2: Math Symbols and Notation
 
