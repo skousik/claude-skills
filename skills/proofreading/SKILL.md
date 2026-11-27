@@ -1,6 +1,6 @@
 ---
 name: proofread
-description: Proofread an academic paper against a structured checklist covering paper structure, math notation, statistical relevance, figures and tables, grammar, abbreviations, and house style (the technical-writing-style skill, which it defers to for prose, structure, and LaTeX source rules). Two modes — report (full written report) and interactive (fix issues step by step together with the user).
+description: Proofread an academic paper against a structured checklist covering paper structure, math notation, statistical relevance, figures and tables, grammar, abbreviations, citations (each checked against its source, with its pinpoint), and house style (the technical-writing-style skill, which it defers to for prose, structure, and LaTeX source rules). Two modes — report (full written report) and interactive (fix issues step by step together with the user).
 allowed-tools: Read Bash Edit
 license: MIT license
 metadata:
@@ -13,7 +13,7 @@ metadata:
 
 ## Overview
 
-Systematically proofread an academic paper against seven structured checks. Each check scans the full paper and collects concrete, line-level findings.
+Systematically proofread an academic paper against eight structured checks. Each check scans the full paper and collects concrete, line-level findings.
 
 Two modes are available:
 - **Report mode** (default): produces a single prioritized written report organized by check, with a summary scorecard at the top.
@@ -27,8 +27,9 @@ This skill audits; the `technical-writing-style` skill (in the same repository) 
 
 - **technical-writing-style owns** voice, prose patterns to avoid, section architecture (introduction arc, contributions, Related Work, experiments, limitations), LaTeX source conventions, and exposition. This skill does not restate those rules. Check 7 walks its checklist instead, and Checks 1 and 5 point to it where they overlap.
 - **This skill owns** the line-level audits that the writing skill does not cover: symbol and index definitions, notation consistency, statistical reporting, figure and table mechanics, grammar mechanics (tense, spelling variant, punctuation, compound adjectives), abbreviations, the jargon audit of Check 1.11, and the non-sequitur audit of Check 1.12.
+- **Citations are shared.** technical-writing-style states the citation rules and the audit procedure (`references/citation-audit.md`); Check 8 runs that procedure on every citation and reports its findings here. Check 7 does not re-report them.
 - **Precedence.** Where a check below conflicts with technical-writing-style, or with a project's own style guide (`STYLE_GUIDE*`, `CLAUDE.md`, coauthor notes), those win. The known conflicts are resolved inline and marked "house override".
-- If technical-writing-style is not installed, run Checks 1–6 as written and skip Check 7.
+- If technical-writing-style is not installed, run Checks 1–6 and Check 8 as written (Check 8 then follows its own steps without the reference file) and skip Check 7.
 
 This skill targets **LaTeX source files** as primary input. Plain-text and PDF inputs are supported but yield less precise findings (line numbers will be approximate or absent).
 
@@ -47,7 +48,7 @@ Use this skill when:
 ```
 
 - `path` — path to the paper's root `.tex` file or directory containing `.tex` files. Defaults to the current directory.
-- `--check <id>` — run only a specific check. IDs: `intro`, `math-notation`, `stats`, `figures`, `grammar`, `abbrev`, `style`. Omit to run all seven.
+- `--check <id>` — run only a specific check. IDs: `intro`, `math-notation`, `stats`, `figures`, `grammar`, `abbrev`, `style`, `cite`. Omit to run all eight.
 - `--interactive` — enable interactive mode. Omit for report mode.
 
 ---
@@ -662,7 +663,7 @@ Compound adjectives before a noun must be hyphenated.
 
 #### 5.13 Voice and citation rules
 
-Evaluator and auditor voice, citation specificity (no whole-book citations), and generic reach-avoid wording in the method are technical-writing-style rules, checked in Check 7.
+Evaluator and auditor voice and generic reach-avoid wording in the method are technical-writing-style rules, checked in Check 7. Citation correctness and specificity are checked in Check 8.
 
 ---
 
@@ -734,6 +735,27 @@ Plurals of abbreviations are formed by appending a lowercase `s` directly: `NNs`
 4. **Do not double-report.** Skip a finding that Checks 1–6 already report; cite the rule there instead.
 
 Severity: `[ERROR]` for a broken source convention that changes what a reader can do (unnumbered display, `\ref` or `\eqref` instead of `\Cref`, a label with a space after a comma in a multi-label reference, an em-dash); `[WARN]` for prose and structure rules; `[INFO]` for stated preferences.
+
+---
+
+### Check 8: Citations
+
+**Goal**: Verify that every citation is correct: the cited work states what the sentence attributes to it, the pinpoint names the result, the paper's own constructions are not credited to prior work, and each bib entry resolves to the right record. A wrong citation is worse than none, and reviewers who know the cited work catch it, so check every citation, not a sample.
+
+1. **Load the procedure.** Read `<technical-writing-style>/references/citation-audit.md` and follow it. The steps below summarize it for reporting.
+2. **Collect each (sentence, cited work) pair** in document order, with its pinpoint. A multi-cite `\cite{a,b}` gives one pair per key. `[HARD]`
+3. **Check metadata.** Resolve each DOI through Crossref (arXiv API or zbMATH for entries without one) and compare title, authors, venue, volume, pages, and year; confirm against the publisher or the PDF before trusting a mismatch. `[HARD]`
+   - `[ERROR]` if a DOI does not resolve or resolves to a different work.
+   - `[WARN]` if title, authors, venue, year, or pages disagree with the record.
+4. **Check each claim in the source's own text**, not its title or abstract. `[VIBE]`
+   - `[ERROR]` if the source does not contain the attributed result, or a construction the sentence attributes to it never appears in its text (the paper's own construction is credited to prior work).
+   - `[ERROR]` if the pinpoint (theorem, definition, section, equation) is wrong in the version checked.
+   - `[WARN]` if the source says less than the sentence (orders vs. explicit constants, a special case, one direction), or a multi-cite credits each work with a part only another supports.
+   - `[WARN]` if a book, monograph, long survey, or a paper whose result is not its headline is cited without a pinpoint, or with one coarser than the statement (a chapter for a theorem).
+   - `[INFO]` if the citation could not be verified (paywalled original, only a draft edition available); say what secondary source was used.
+5. **Check propagation.** If the project has a website, code, or other versions of the manuscript in reach, search them for each corrected attribution and report matches as `[WARN]`. `[MIX]`
+
+Each finding gives file, line, the sentence, the bib key, what the source actually says (quoted briefly, with its number and page), a link to the copy read, and the concrete fix from the procedure's table. Report the version the pinpoints were checked in when it differs from the bib entry's (a free draft vs. the printed edition). For a long bibliography, delegate the claim checks as the procedure describes, and re-check any finding that changes a citation before reporting it as an `[ERROR]`.
 
 ---
 

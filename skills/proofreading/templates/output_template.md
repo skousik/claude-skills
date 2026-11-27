@@ -16,6 +16,7 @@
 | 5 | Grammar & Style         | n      | n        | n    | n     |
 | 6 | Abbreviations           | n      | n        | n    | n     |
 | 7 | House Style             | n      | n        | n    | n     |
+| 8 | Citations               | n      | n        | n    | n     |
 |   | **Total**               | **n**  | **n**    | **n**| **n** |
 
 ---
@@ -111,3 +112,15 @@
 {{style_findings}}
 
 *Cite the technical-writing-style rule in each finding, e.g. `TWS: numbered displays`.*
+
+---
+
+## 8. Citations
+
+**Summary:** {{cite_summary}}
+
+### Findings
+
+{{cite_findings}}
+
+*Each finding names the bib key, quotes what the source says with its number and page, links the copy read, and lists unverified citations as `[INFO]`.*
