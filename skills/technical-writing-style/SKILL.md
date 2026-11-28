@@ -228,3 +228,15 @@ Run this on any section or full draft before calling it done:
 - [ ] `scripts/tone_check.py` run with the right profile on drafts of ~1,500+ words; remaining flags are deliberate.
 - [ ] If the classic theory register was chosen: the guarantee is named, each main result has a paraphrase before it and a conservatism remark after it, assumptions are glossed, contributions cite their theorems, speed or performance claims are tied to a reference threshold, and the long sentences fall in narrative prose, not only in definitions.
 - [ ] Read transitions aloud.
+
+## After drafting: offer a proofread
+
+When a draft or a substantial revision is done (a new section, a rewritten introduction, a full paper), ask the user whether to run the `proofreading` skill on it before calling it finished. Do not run it unasked: a full proofread reads the whole paper several times and can cost much more than the drafting did.
+
+When asking, give a rough cost so the user can decide:
+- **Size.** Measure the source in scope (e.g., `wc -w` over the `.tex` files the root inputs, excluding commented-out appendices; about 1.4 tokens per word of LaTeX).
+- **Tokens.** A full eight-check report runs to roughly 10 to 15 times the source's tokens, since each check rereads the paper; run in parallel subagents, it costs about the same in total but finishes sooner. Say that the figure is an estimate.
+- **Time.** Say how long a pass of that size took last time in the session or project, if one ran; otherwise give no time estimate.
+- **Cheaper options.** Offer the targeted checks the draft most needs: for a rewritten section, only that section; for new prose, `--check intro`, `style`, and the jargon audit (Check 1.11) cost a fraction of the full report.
+
+Skip the offer for small edits (a sentence or a paragraph), where the final pass checklist above is enough.
