@@ -105,6 +105,82 @@ SECTION_KINDS = [("intro", ["introduction"]), ("related", ["related", "prior wor
                  ("problem", ["problem", "preliminar", "formulation", "background", "setup", "notation"])]
 
 
+# Group 20 (hint): long noun phrases as subjects or objects. A heuristic on tokens, without a parser, so it misses
+# some cases and flags some legitimate long subjects; read each hit.
+_PREP = {"of", "in", "on", "at", "to", "from", "for", "with", "by", "through", "over", "across", "within", "between",
+         "into", "onto", "among", "without", "under", "about", "along", "around", "beyond", "per", "against", "after", "before"}
+_REL = {"that", "which", "who", "whose", "whom", "where"}
+_AUX = {"is", "are", "was", "were", "has", "have", "had", "can", "could", "will", "would", "may", "might", "must",
+        "does", "do", "did", "shall", "should"}
+# Common finite verbs of technical prose (third person and past); extend as needed.
+_VERBS = set("""predicts predict pushes push pushed gathers gather gathered holds hold held keeps keep kept takes take took
+uses use used places place placed cuts needs need describes describe carries carry contains contain fits fit penalizes
+reads read maps map gives give lies lie comes come stays stay moves move moved leaves leave left requires require rejects
+reject executes execute learns learn scores score imitates trains train makes make made puts put errs overhangs presses
+shows show records stands says expresses measures measure matches match reaches reach tracks track slides tilts lifts
+behaves peaks beats helps flags follows starts becomes ends divides applies eases extends bounds bound grows grow
+drifts decreases increases cover covers lets let reduces reduce costs cost improves improve outperforms differs
+depends depend yields yield returns return remains remain falls fall rises rise
+""".split())
+_PRON = {"we", "it", "they", "this", "these", "those", "he", "she", "one", "i", "you"}
+_CONJ = {"and", "so", "but", "or", "whereas", "while", "because", "since", "which", "where", "though", "although", "yet"}
+_ADV = {"also", "still", "thus", "then", "now", "only", "never", "often", "always", "typically", "already", "therefore"}
+_INTRO = {"on", "in", "with", "for", "after", "before", "when", "if", "because", "although", "though", "to", "as", "over",
+          "while", "since", "unlike", "like", "among", "at", "by", "from", "under", "once", "whereas", "given", "during",
+          "within", "without", "through", "across", "against", "here", "there", "still", "thus", "so", "first",
+          "second", "third", "finally", "however", "instead", "then", "also", "again", "by"}
+
+
+def long_noun_phrase_hints(s):
+    """Return reasons why sentence s may hide a long noun phrase (group 20)."""
+    out = []
+    w = re.findall(r"MATHX|\[CITE\]|REF|[A-Za-z][A-Za-z'-]*|\d+(?:\.\d+)?|[,;:.]", s)
+    low = [x.lower() for x in w]
+    # (a) a clause used as a noun: "by how well X does", "of whether ...", "measure what ..."
+    for i in range(len(low) - 1):
+        if low[i] in {"by", "on", "about", "from", "of", "judge", "judges", "measure", "measures"} and \
+                low[i + 1] in {"how", "what", "whether"}:
+            out.append(f"a clause used as a noun ('{w[i]} {w[i + 1]} ...')")
+            break
+    # (b) a long subject: skip a leading phrase that ends in a comma, then count words before the main verb. A verb
+    # inside a relative clause ("the mass that each density places ...") does not end the subject.
+    start = 0
+    if low and (low[0] in _INTRO or low[0].endswith("ing")) and "," in low[:30]:
+        start = low.index(",") + 1
+    if start < len(low) and low[start] not in _PRON:
+        rel_open = 0
+        for j in range(start, len(low)):
+            x = low[j]
+            if x in {";", ":", "."} or (x == "," and j + 1 < len(low) and low[j + 1] in _CONJ):
+                break
+            if x in _REL:
+                rel_open += 1
+                continue
+            if x in _AUX or x in _VERBS or x in _ADV:
+                if rel_open and x not in _ADV:
+                    rel_open -= 1
+                    continue
+                subj = [y for y in low[start:j] if y not in {",", ";", ":"}]
+                if len(subj) > 12 and (_REL & set(subj) or sum(y in _PREP for y in subj) >= 2):
+                    out.append(f"a subject of {len(subj)} words before '{w[j]}'")
+                break
+    # (c) a long noun phrase after "is/are/was/were/as": to the next ; : or . (commas included)
+    for i in range(len(low) - 1):
+        if low[i] in {"is", "are", "was", "were", "as"} and low[i + 1] in {"the", "a", "an"}:
+            span = []
+            rest = low[i + 1:]
+            for k, x in enumerate(rest):
+                if x in {";", ":", "."} or (x == "," and k + 1 < len(rest) and rest[k + 1] in _CONJ):
+                    break
+                if x != ",":
+                    span.append(x)
+            n_prep = sum(x in _PREP for x in span)
+            if len(span) >= 14 and ((_REL & set(span) and n_prep >= 2) or n_prep >= 4):
+                out.append(f"a noun phrase of {len(span)} words after '{w[i]}' with {n_prep} prepositions")
+                break
+    return out
+
+
 def inline(path, root, depth=0):
     txt = re.sub(r"(?<!\\)%.*", "", path.read_text(errors="ignore"))
     if depth > 6:
@@ -224,6 +300,8 @@ def main():
             print("  -", re.sub(r"\s+", " ", s)[:200])
     ai_hits = []
     for s in sents:
+        for reason in long_noun_phrase_hints(s):
+            ai_hits.append(("20 long noun phrase (hint): " + reason, s))
         for name, pat in AI_PATTERNS.items():
             if re.search(pat, s, re.I) and not (name.startswith("12") and "[CITE]" in s):
                 ai_hits.append((name, s))
@@ -253,7 +331,7 @@ def main():
                 if whole and not opt:
                     ai_hits.append(("whole-book citation; cite a section or theorem", f"{f.name}:{i}: {', '.join(whole)}"))
     print(f"\n{len(ai_hits)} AI-like pattern hit(s) (see \"Don't write like AI!\" in SKILL.md).")
-    for name, s in ai_hits[:40]:
+    for name, s in ai_hits[:80]:
         print(f"  [{name}] {re.sub(r'\s+', ' ', s)[:180]}")
 
 
